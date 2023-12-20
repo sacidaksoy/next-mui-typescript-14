@@ -14,7 +14,7 @@ export default function DashboardLayout({
       <CssBaseline />
       <Navbar />
       <Sidebar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box component="main" sx={{ flexGrow: 1, height: "90vh", p: 3 }}>
         <DrawerHeader />
         {children}
       </Box>
