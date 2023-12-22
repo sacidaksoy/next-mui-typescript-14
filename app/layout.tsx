@@ -1,4 +1,3 @@
-import ThemeRegistry from "@/theme/ThemeRegistry";
 import Providers from "./providers";
 
 export const metadata = {
@@ -13,11 +12,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <ThemeRegistry>
-        <body>
-          <Providers>{children}</Providers>
-        </body>
-      </ThemeRegistry>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

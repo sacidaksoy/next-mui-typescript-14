@@ -3,6 +3,7 @@ import { Box, CssBaseline } from "@mui/material";
 
 import Navbar, { DrawerHeader } from "../ui/Navbar/Navbar";
 import Sidebar from "../ui/Sidebar/Sidebar";
+import DialogWrapper from "@/ui/Dialog/DialogWrapper";
 
 export default function DashboardLayout({
   children,
@@ -18,6 +19,7 @@ export default function DashboardLayout({
         <DrawerHeader />
         {children}
       </Box>
+      <DialogWrapper />
     </Box>
   );
 }

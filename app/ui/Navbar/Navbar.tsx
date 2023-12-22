@@ -1,10 +1,11 @@
 "use client";
 
-import { IconButton, Toolbar, Typography } from "@mui/material";
-import { Menu as MenuIcon } from "@mui/icons-material";
+import { IconButton, Toolbar } from "@mui/material";
+import WebStoriesIcon from "@mui/icons-material/WebStories";
 import { styled } from "@mui/material/styles";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import React from "react";
+import IconBreadcrumbs from "@/ui/Breadcrumb";
 
 const drawerWidth = 240;
 
@@ -40,22 +41,19 @@ const AppBar = styled(MuiAppBar, {
 }));
 const Navbar = () => {
   return (
-    <AppBar position="fixed" >
+    <AppBar position="fixed">
       <Toolbar>
         <IconButton
           color="inherit"
           aria-label="open drawer"
-          // onClick={handleDrawerOpen}
           edge="start"
           sx={{
             marginRight: 5,
           }}
         >
-          {/* <MenuIcon /> */}
+          <WebStoriesIcon />
         </IconButton>
-        <Typography variant="h6" noWrap component="div">
-          Mini variant drawer
-        </Typography>
+        <IconBreadcrumbs />
       </Toolbar>
     </AppBar>
   );
