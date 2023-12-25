@@ -1,16 +1,25 @@
-"use client";
-
-import { useAppSelector } from "@/lib/hooks";
 import Dialog from "./Dialog";
 
-export default function DialogWrapper() {
-  const dialogs = useAppSelector((state) => state.app.dialogs);
-
+export default function DialogWrapper({
+  searchParams,
+  title,
+  content,
+}: {
+  searchParams?: {
+    showDialog?: string;
+  };
+  title: string;
+  content: React.ReactNode;
+}) {
+  const showDialog = searchParams?.showDialog || "";
   return (
-    <>
-      {dialogs.map((dialog, index) => (
-        <Dialog key={`dialog-${index}`} dialog={dialog} />
-      ))}
-    </>
+    <Dialog
+      dialog={{
+        open: showDialog === "open",
+        title,
+        // @ts-expect-error
+        content,
+      }}
+    />
   );
 }

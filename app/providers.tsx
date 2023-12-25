@@ -8,16 +8,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ThemeRegistry from "./theme/ThemeRegistry";
 
-import { useRef } from "react";
-import { Provider as StoreProvider } from "react-redux";
-import { AppStore, makeStore } from "./lib/store";
+import { SnackbarProvider } from "notistack";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const storeRef = useRef<AppStore>();
-  if (!storeRef.current) {
-    // Create the store instance the first time this renders
-    storeRef.current = makeStore();
-  }
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -32,11 +25,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <StoreProvider store={storeRef.current}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeRegistry>{children}</ThemeRegistry>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </StoreProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeRegistry>
+        <SnackbarProvider maxSnack={5}>{children}</SnackbarProvider>
+      </ThemeRegistry>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }

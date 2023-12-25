@@ -88,7 +88,7 @@ const MenuItems = [
 ];
 
 const Sidebar = () => {
-//   const pathname = usePathname();
+  //   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
 
   const onMouseEnter = () => {
@@ -112,6 +112,7 @@ const Sidebar = () => {
           <Link
             key={title}
             href={href}
+            scroll={false}
             // className={pathname === `/dashboard/${title}` ? "active" : ""}
             style={{ textDecoration: "none", color: "MenuText" }}
           >

@@ -23,7 +23,7 @@ export default function Breadcrumb() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                color: isActive ? "pwc.primary.contrastText" : "inherit",
+                color: isActive ? "" : "",
                 fontWeight: isActive ? "bold" : "normal",
                 textDecoration: isActive ? "none" : "ActiveBorder",
               }}

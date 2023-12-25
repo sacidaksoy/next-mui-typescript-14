@@ -1,9 +1,9 @@
-import * as React from "react";
 import { Box, CssBaseline } from "@mui/material";
+import { Suspense } from "react";
 
 import Navbar, { DrawerHeader } from "../ui/Navbar/Navbar";
 import Sidebar from "../ui/Sidebar/Sidebar";
-import DialogWrapper from "@/ui/Dialog/DialogWrapper";
+import Loading from "./loading";
 
 export default function DashboardLayout({
   children,
@@ -15,11 +15,12 @@ export default function DashboardLayout({
       <CssBaseline />
       <Navbar />
       <Sidebar />
-      <Box component="main" sx={{ flexGrow: 1, height: "90vh", p: 3 }}>
-        <DrawerHeader />
-        {children}
-      </Box>
-      <DialogWrapper />
+      <Suspense fallback={<Loading />}>
+        <Box component="main" sx={{ flexGrow: 1, height: "90vh", p: 3 }}>
+          <DrawerHeader />
+          {children}
+        </Box>
+      </Suspense>
     </Box>
   );
 }

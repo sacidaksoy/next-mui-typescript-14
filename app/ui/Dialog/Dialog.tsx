@@ -12,8 +12,7 @@ import {
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 
-import { closeDialog } from "@/lib/features/app";
-import { useAppDispatch } from "@/lib/hooks";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export interface DialogProps extends MuiDialogProps {
   titleProps?: MuiDialogTitleProps;
@@ -34,15 +33,17 @@ const Dialog = ({ dialog }: { dialog: DialogProps }) => {
     ...props
   } = dialog;
 
-  const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
 
-  function handleClose() {
-    dispatch(closeDialog());
-  }
+  const handleClose = () => {
+    replace(pathname);
+  };
 
   return (
     <MuiDialog
-      open={open}
+      open={searchParams.has("showDialog")}
       onClose={handleClose}
       maxWidth="md"
       fullWidth

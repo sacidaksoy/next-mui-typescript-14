@@ -1,39 +1,116 @@
 "use client";
 import * as React from "react";
 import Box from "@mui/material/Box";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
-import { IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { DataGrid, GridColDef, GridToolbarContainer } from "@mui/x-data-grid";
+import { Button, IconButton, Paper, Tooltip, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useTodos } from "./queries/useTodos";
 
 import {
-  //   Add as AddIcon,
+  Add as AddIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
 } from "@mui/icons-material";
-import { enqueueDialog } from "@/lib/features/app";
-import TodoDuzenle from "./forms/TodoDuzenle";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { TodoDuzenle, TodoOlustur } from "./forms";
+import { useTodosSil } from "./queries/useMusteriSil";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import DialogWrapper from "@/ui/Dialog/DialogWrapper";
+
+const DataGridToolbar = ({ onTodoOlustur }: { onTodoOlustur: () => void }) => (
+  <GridToolbarContainer
+    sx={(theme) => ({
+      borderBottomWidth: "1px",
+      borderBottomStyle: "solid",
+      borderBottomColor: theme.palette.grey[300],
+    })}
+  >
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        padding: "8px",
+      }}
+    >
+      <Box>
+        <Typography variant="h6">Todos</Typography>
+      </Box>
+      <Box
+        sx={{
+          flex: "1 1 auto",
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: "16px",
+        }}
+      >
+        <Button
+          size="small"
+          variant="contained"
+          color="secondary"
+          onClick={onTodoOlustur}
+          startIcon={<AddIcon fontSize="small" />}
+        >
+          Yeni Müşteri
+        </Button>
+      </Box>
+    </Box>
+  </GridToolbarContainer>
+);
 
 export default function Invoices() {
   const todos = useTodos({ params: { start: 10, limit: 50 } });
+  const todosSil = useTodosSil();
 
-  const dispatch = useAppDispatch();
-  const dialogState = useAppSelector((state) => state.app.dialogs);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const params = new URLSearchParams(searchParams);
 
-  console.log({ dialogState });
+  interface DialogState {
+    title: string;
+    content: React.ReactNode;
+  }
+
+  const [dialog, setDialog] = React.useState<DialogState>({
+    title: "Başlık",
+    content: <div>Varsayılan İçerik</div>,
+  });
+
   const snackbar = useSnackbar();
 
-  const handleTodoDuzenleButtonClick = React.useCallback(
-    (todo: Todos) =>
-      dispatch(
-        enqueueDialog({
-          title: "Müşteri Düzenle",
-          // @ts-expect-error: Dialog TypeScript
-          content: <TodoDuzenle todo={todo} />,
-        })
-      ),
-    [dispatch]
+  function returnDialog(title: string, content: React.ReactNode) {
+    params.set("showDialog", "open");
+    replace(`${pathname}?${params.toString()}`);
+    setDialog({ title, content });
+  }
+
+  const handleTodoOlusturClick = () => {
+    returnDialog("Todo Oluştur", <TodoOlustur />);
+  };
+
+  const handleTodoDuzenleButtonClick = (todo: Todos) => {
+    returnDialog("Todo Düzenle", <TodoDuzenle todo={todo} />);
+  };
+
+  const handleTodosSilClick = React.useCallback(
+    async (todos: Todos) => {
+      const confirm = window.confirm("Silmek istediğinize emin misiniz?");
+
+      if (confirm) {
+        try {
+          await todosSil.mutateAsync({ todos });
+          snackbar.enqueueSnackbar("Başarıyla silindi.", {
+            variant: "success",
+          });
+        } catch (error) {
+          snackbar.enqueueSnackbar("Silinirken hata oluştu.", {
+            variant: "error",
+          });
+        }
+      }
+    },
+    [snackbar, todosSil]
   );
 
   const rows = todos.data || [];
@@ -81,7 +158,7 @@ export default function Invoices() {
           <Tooltip title="Sil">
             <IconButton
               size="small"
-              //   onClick={() => handleMusteriSilButtonClick(params.row)}
+              onClick={() => handleTodosSilClick(params.row)}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -125,10 +202,16 @@ export default function Invoices() {
         getRowId={(row) => row.id}
         // autoPageSize
         slots={{
-          toolbar: GridToolbar,
+          toolbar: DataGridToolbar,
+        }}
+        slotProps={{
+          toolbar: {
+            onTodoOlustur: handleTodoOlusturClick,
+          },
         }}
         loading={todos.isLoading}
       />
+      <DialogWrapper title={dialog?.title} content={dialog?.content} />
     </Box>
   );
 }

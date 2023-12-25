@@ -1,11 +1,11 @@
-import { useMemo } from "react";
 import { Box, Button, Grid, MenuItem } from "@mui/material";
 import { AxiosError } from "axios";
 import { useSnackbar } from "notistack";
 import { FormikHelpers, FormikProvider, useFormik } from "formik";
 import { boolean, object, string } from "yup";
+
 import { FormikTextField } from "@/ui/Formik";
-import { useTodosDuzenle } from "../queries/useTodosDuzenle";
+import { useTodosOlustur } from "../queries/useTodosOlustur";
 import { usePathname, useRouter } from "next/navigation";
 
 interface FormValues {
@@ -18,19 +18,16 @@ const validationSchema = object({
   completed: boolean().required("Bu alan zorunludur."),
 });
 
-const TodoDuzenle = ({ todo }: { todo: Todos }) => {
-  const todoDuzenle = useTodosDuzenle();
+const TodoOlustur = () => {
+  const todoOlustur = useTodosOlustur();
   const snackbar = useSnackbar();
   const { replace } = useRouter();
   const pathname = usePathname();
 
-  const initialValues: FormValues = useMemo(
-    () => ({
-      title: todo.title,
-      completed: todo.completed,
-    }),
-    [todo]
-  );
+  const initialValues: FormValues = {
+    title: "",
+    completed: false,
+  };
 
   const handleVazgecButtonClick = () => {
     replace(pathname);
@@ -45,7 +42,7 @@ const TodoDuzenle = ({ todo }: { todo: Todos }) => {
         title: values.title,
         completed: values.completed,
       };
-      await todoDuzenle.mutateAsync({ todo, payload });
+      await todoOlustur.mutateAsync({ payload });
       snackbar.enqueueSnackbar("Todo başarıyla oluşturuldu", {
         variant: "success",
       });
@@ -80,19 +77,18 @@ const TodoDuzenle = ({ todo }: { todo: Todos }) => {
     initialValues,
     validationSchema,
     onSubmit: handleSubmit,
-    enableReinitialize: true,
   });
 
   return (
     <Box component="form" onSubmit={formik.handleSubmit}>
       <FormikProvider value={formik}>
-        <Grid container>
+        <Grid container spacing={2}>
           <Grid item xs={6}>
             <Box>
               <FormikTextField
                 id="title"
                 name="title"
-                label="title"
+                label="Title"
                 fullWidth
               />
             </Box>
@@ -120,7 +116,7 @@ const TodoDuzenle = ({ todo }: { todo: Todos }) => {
           display: "flex",
           justifyContent: "flex-end",
           gap: "8px",
-          margin: "16px",
+          marginTop: "16px",
         }}
       >
         <Button
@@ -137,11 +133,11 @@ const TodoDuzenle = ({ todo }: { todo: Todos }) => {
           variant="contained"
           disabled={formik.isSubmitting}
         >
-          Kaydet
+          Oluştur
         </Button>
       </Box>
     </Box>
   );
 };
 
-export default TodoDuzenle;
+export default TodoOlustur;
