@@ -11,10 +11,8 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
 } from "@mui/icons-material";
-import { TodoDuzenle, TodoOlustur } from "./forms";
 import { useTodosSil } from "./queries/useMusteriSil";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import DialogWrapper from "@/ui/Dialog/DialogWrapper";
+import { usePathname, useRouter } from "next/navigation";
 
 const DataGridToolbar = ({ onTodoOlustur }: { onTodoOlustur: () => void }) => (
   <GridToolbarContainer
@@ -62,35 +60,17 @@ export default function Invoices() {
   const todos = useTodos({ params: { start: 10, limit: 50 } });
   const todosSil = useTodosSil();
 
-  const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { replace } = useRouter();
-  const params = new URLSearchParams(searchParams);
-
-  interface DialogState {
-    title: string;
-    content: React.ReactNode;
-  }
-
-  const [dialog, setDialog] = React.useState<DialogState>({
-    title: "Başlık",
-    content: <div>Varsayılan İçerik</div>,
-  });
+  const router = useRouter();
 
   const snackbar = useSnackbar();
 
-  function returnDialog(title: string, content: React.ReactNode) {
-    params.set("showDialog", "open");
-    replace(`${pathname}?${params.toString()}`);
-    setDialog({ title, content });
-  }
-
   const handleTodoOlusturClick = () => {
-    returnDialog("Todo Oluştur", <TodoOlustur />);
+    router.push(`${pathname}/create-todo`);
   };
 
   const handleTodoDuzenleButtonClick = (todo: Todos) => {
-    returnDialog("Todo Düzenle", <TodoDuzenle todo={todo} />);
+    router.push(`${pathname}/${todo.id}`);
   };
 
   const handleTodosSilClick = React.useCallback(
@@ -211,7 +191,6 @@ export default function Invoices() {
         }}
         loading={todos.isLoading}
       />
-      <DialogWrapper title={dialog?.title} content={dialog?.content} />
     </Box>
   );
 }

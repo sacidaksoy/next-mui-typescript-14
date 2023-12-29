@@ -1,42 +1,40 @@
 import { Box, Button, Grid, MenuItem } from "@mui/material";
-import { AxiosError } from "axios";
 import { useSnackbar } from "notistack";
-import { FormikHelpers, FormikProvider, useFormik } from "formik";
-import { boolean, object, string } from "yup";
 
-import { FormikTextField } from "@/ui/Formik";
 import { useTodosOlustur } from "../queries/useTodosOlustur";
-import { usePathname, useRouter } from "next/navigation";
-
-interface FormValues {
-  title: string;
-  completed: boolean;
-}
-
-const validationSchema = object({
-  title: string().required("Bu alan zorunludur."),
-  completed: boolean().required("Bu alan zorunludur."),
-});
+import { useRouter } from "next/navigation";
+import { useForm, SubmitHandler, FormProvider } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FormInputText } from "@/ui/ReactHookForm";
 
 const TodoOlustur = () => {
   const todoOlustur = useTodosOlustur();
   const snackbar = useSnackbar();
-  const { replace } = useRouter();
-  const pathname = usePathname();
+  const router = useRouter();
 
-  const initialValues: FormValues = {
-    title: "",
-    completed: false,
-  };
+  const validationSchema = z.object({
+    title: z.string().min(1, { message: "Bu alan zorunludur." }),
+    completed: z.boolean(),
+  });
+
+  type ValidationSchemaType = z.infer<typeof validationSchema>;
+
+  const methods = useForm<ValidationSchemaType>({
+    mode: "onBlur", // don't need to submit before knowing whether that field is valid or not.
+    reValidateMode: "onBlur", //behaviour is consistent after the first submit
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      title: "",
+      completed: false,
+    },
+  });
 
   const handleVazgecButtonClick = () => {
-    replace(pathname);
+    router.back();
   };
 
-  async function handleSubmit(
-    values: FormValues,
-    formikHelpers: FormikHelpers<FormValues>
-  ) {
+  const onSubmit: SubmitHandler<ValidationSchemaType> = async (values) => {
     try {
       const payload = {
         title: values.title,
@@ -46,97 +44,62 @@ const TodoOlustur = () => {
       snackbar.enqueueSnackbar("Todo başarıyla oluşturuldu", {
         variant: "success",
       });
-      replace(pathname);
+      router.back();
     } catch (error) {
       let errorMessage = "Todo oluşturulurken hata oluştu.";
-      if (error instanceof AxiosError) {
-        const errorData = error.response!.data as object;
-        let isValidationError = false;
-        if (errorData) {
-          for (const [key, value] of Object.entries(errorData)) {
-            if (Object.keys(initialValues).includes(key)) {
-              formikHelpers.setFieldError(key, value);
-              isValidationError = true;
-            }
-          }
-          if (isValidationError) {
-            return;
-          }
-          if ("error" in errorData) {
-            errorMessage = errorData.error as string;
-          }
-        }
-      }
       snackbar.enqueueSnackbar(errorMessage, {
         variant: "error",
       });
     }
-  }
-
-  const formik = useFormik({
-    initialValues,
-    validationSchema,
-    onSubmit: handleSubmit,
-  });
+  };
 
   return (
-    <Box component="form" onSubmit={formik.handleSubmit}>
-      <FormikProvider value={formik}>
+    <FormProvider {...methods}>
+      <Box component="form" onSubmit={methods.handleSubmit(onSubmit)}>
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <Box>
-              <FormikTextField
-                id="title"
-                name="title"
-                label="Title"
-                fullWidth
-              />
+              <FormInputText name={"title"} label="Title" />
             </Box>
           </Grid>
           <Grid item xs={6}>
             <Box>
-              <FormikTextField
-                id="completed"
-                name="completed"
-                label="Completed?"
-                select
-                fullWidth
-              >
+              <FormInputText name={"completed"} label="Completed" select>
                 {/* @ts-expect-error: MenuItem Typecript */}
                 <MenuItem value={true}>Evet</MenuItem>
                 {/* @ts-expect-error: MenuItem Typecript */}
                 <MenuItem value={false}>Hayır</MenuItem>
-              </FormikTextField>
+              </FormInputText>
             </Box>
           </Grid>
         </Grid>
-      </FormikProvider>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: "8px",
-          marginTop: "16px",
-        }}
-      >
-        <Button
-          color="secondary"
-          variant="contained"
-          onClick={handleVazgecButtonClick}
-          disabled={formik.isSubmitting}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "8px",
+            marginTop: "16px",
+          }}
         >
-          Vazgeç
-        </Button>
-        <Button
-          type="submit"
-          color="primary"
-          variant="contained"
-          disabled={formik.isSubmitting}
-        >
-          Oluştur
-        </Button>
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={handleVazgecButtonClick}
+            // disabled={formik.isSubmitting}
+          >
+            Vazgeç
+          </Button>
+          <Button
+            type="submit"
+            color="primary"
+            variant="contained"
+            // disabled={formik.isSubmitting}
+          >
+            Oluştur
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </FormProvider>
   );
 };
 

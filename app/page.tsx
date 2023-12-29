@@ -1,7 +1,9 @@
-import { Typography } from '@mui/material'
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <Typography variant='h6'>Welcome Mui</Typography>
-  )
+    <Link href="/previews/dialog-next-router/login" className="button">
+      Login
+    </Link>
+  );
 }

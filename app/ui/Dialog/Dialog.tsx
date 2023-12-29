@@ -9,12 +9,16 @@ import {
   DialogTitleProps as MuiDialogTitleProps,
   DialogContentProps as MuiDialogContentProps,
   DialogActionsProps as MuiDialogActionsProps,
+  Box,
+  CircularProgress,
+  Typography,
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
-
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export interface DialogProps extends MuiDialogProps {
+  loading?: boolean;
+  error?: boolean;
   titleProps?: MuiDialogTitleProps;
   contentProps?: MuiDialogContentProps;
   actions?: MuiDialogActionsProps["children"];
@@ -24,6 +28,8 @@ export interface DialogProps extends MuiDialogProps {
 const Dialog = ({ dialog }: { dialog: DialogProps }) => {
   const {
     open,
+    loading,
+    error,
     title,
     titleProps = {},
     content,
@@ -33,17 +39,15 @@ const Dialog = ({ dialog }: { dialog: DialogProps }) => {
     ...props
   } = dialog;
 
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
+  const router = useRouter();
 
   const handleClose = () => {
-    replace(pathname);
+    router.back();
   };
 
   return (
     <MuiDialog
-      open={searchParams.has("showDialog")}
+      open={open}
       onClose={handleClose}
       maxWidth="md"
       fullWidth
@@ -74,7 +78,15 @@ const Dialog = ({ dialog }: { dialog: DialogProps }) => {
           }}
           {...contentProps}
         >
-          {content}
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <CircularProgress size={30} />
+            </Box>
+          ) : error ? (
+            <Typography color="error">Beklenmeyen bir hata oluştu.</Typography>
+          ) : (
+            <>{content}</>
+          )}
         </MuiDialogContent>
       )}
       {actions && (
